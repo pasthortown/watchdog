@@ -1,0 +1,4 @@
+Archivos restaurados.
+
+cp -R ./prueba/hola ./objetivo/hola
+cp -R ./prueba/vendor ./objetivo/vendor

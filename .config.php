@@ -1,13 +1,15 @@
 <?php
 
 $config = [
-    "TARGET_DIR"=>"/var/www/html/SITURIN/frontend",
-    "SOURCE_DIR"=>"/root/SITURIN/frontend",
+    "TARGET_DIR"=>"./objetivo",
+    "SOURCE_DIR"=>"./prueba",
     "SERVER"=>"192.168.20.50 - siturin-pruebas.turismo.gob.ec",
-    "MAIL_TO_NOTIFY"=>"softwaretics@turismo.gob.ec",
+    "MAIL_TO_NOTIFY"=>"luis.salazar@turismo.gob.ec",
 ];
 
-define("CONFIG", $config);
+$excludes = ['vendor'];
 
+define("CONFIG", $config);
+define("EXCLUDES", $excludes);
 ?>
 

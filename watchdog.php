@@ -5,9 +5,11 @@
     class WatchDog {
         public $monitoreado_dir = '';
         public $origen_dir = '';
-
+        private $sonIguales = false;
         public $alertar = false;
         public $comandos = '';
+        private $monitoreado_dir_content = [];
+        private $origen_dir_content = [];
 
         function __construct($monitoreado_dir, $origen_dir) {
             $this->monitoreado_dir = $monitoreado_dir;
@@ -15,11 +17,68 @@
         }
 
         public function comparar() {
-            $monitoreado_dir_content = $this->exploreDir($this->monitoreado_dir);
-            $origen_dir_content = $this->exploreDir($this->origen_dir);
-            foreach($monitoreado_dir_content as $filename_monitoreado) {
+            $sonIguales = $this->son_iguales();
+            $this->monitoreado_vs_origen($this->monitoreado_dir_content, $this->origen_dir_content);
+            $this->origen_vs_monitoreado($this->monitoreado_dir_content, $this->origen_dir_content);
+            if ($this->alertar) {
+                $this->notificar();
+            }
+        }
+
+        protected function origen_vs_monitoreado() {
+            $index = 0;
+            $this->sonIguales = $this->son_iguales();
+            while(!$this->sonIguales) {
+                $filename_origen = $this->origen_dir_content[$index];
                 $existe = false;
-                foreach($origen_dir_content as $filename_origen) { 
+                foreach($this->monitoreado_dir_content as $filename_monitoreado) {
+                    if ($filename_origen['basename'] == $filename_monitoreado['basename']) {
+                        $existe = true;
+                    }
+                }
+                if (!$existe) {
+                    $this->copiar($filename_origen['filename'], $this->monitoreado_dir, $this->origen_dir);
+                    $this->alertar = true;
+                }
+                $this->sonIguales = $this->son_iguales($this->monitoreado_dir_content, $this->origen_dir_content);
+                if (!$this->sonIguales) {
+                    $index++;
+                }
+            }
+        }
+
+        protected function son_iguales() {
+            $toReturn = true;
+            $this->monitoreado_dir_content = $this->exploreDir($this->monitoreado_dir);
+            $this->origen_dir_content = $this->exploreDir($this->origen_dir);
+            foreach($this->origen_dir_content as $origen_file) {
+                $existe = false;
+                $igual = false;
+                foreach($this->monitoreado_dir_content as $monitoreado_file) {
+                    $monitoreado_file_filename = $monitoreado_file['filename'];
+                    $origen_file_filename = $origen_file['filename'];
+                    $monitoreado_file_filename = str_replace($this->monitoreado_dir, $this->origen_dir, $monitoreado_file_filename);
+                    if ($monitoreado_file_filename == $origen_file_filename) {
+                        $existe = true;
+                        if ($this->getChecksumFromFile($monitoreado_file['filename']) == $this->getChecksumFromFile($origen_file['filename'])) {
+                            $igual = true;
+                        }   
+                    }
+                }
+                if (!$existe) {
+                    $toReturn = false;
+                } 
+                if (!$igual) {
+                    $toReturn = false;
+                }
+            }
+            return $toReturn;
+        }
+
+        protected function monitoreado_vs_origen() {
+            foreach($this->monitoreado_dir_content as $filename_monitoreado) {
+                $existe = false;
+                foreach($this->origen_dir_content as $filename_origen) { 
                     if ($filename_origen['basename'] == $filename_monitoreado['basename']) {
                         $existe = true;
                         if ($existe) {
@@ -40,21 +99,6 @@
                     $this->borrar($filename_monitoreado['filename']);
                     $this->alertar = true;
                 }
-            }
-            foreach($origen_dir_content as $filename_origen) {
-                $existe = false;
-                foreach($monitoreado_dir_content as $filename_monitoreado) {
-                    if ($filename_origen['basename'] == $filename_monitoreado['basename']) {
-                        $existe = true;
-                    }
-                }
-                if (!$existe) {
-                    $this->copiar($filename_origen['filename'], $this->monitoreado_dir, $this->origen_dir);
-                    $this->alertar = true;
-                }
-            }
-            if ($this->alertar) {
-                $this->notificar();
             }
         }
 
@@ -101,9 +145,16 @@
         }
 
         protected function exploreDir($directory) {
-            $fileList = glob($directory . '/*');
+            $fileListToExplore = glob($directory . '/*');
             $contenido_base = [];
             $totalContent = [];
+            $fileList = [];
+            foreach($fileListToExplore as $path) {
+                $exclude = $this->is_excluded($path);
+                if (!$exclude) {
+                    array_push($fileList, $path);
+                }
+            }
             foreach($fileList as $filename){
                 array_push($contenido_base, $filename);
             }
@@ -121,6 +172,21 @@
             return $totalContent;
         }
         
+        protected function is_excluded($path) {
+            $exclude = false;
+            $excludes = EXCLUDES;
+            foreach($excludes as $dirname) {
+                if (basename(dirname($path)) == $dirname) {
+                    $exclude = true;
+                }
+                $path_pieces = explode("/", $path);
+                if ($path_pieces[sizeof($path_pieces) - 1] == $dirname) {
+                   $exclude = true;
+                }
+            }
+            return $exclude;
+        }
+
         protected function getChecksumFromFile($filename) {
             $ext = pathinfo($filename, PATHINFO_EXTENSION);
             if($ext == '') {
