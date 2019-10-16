@@ -130,12 +130,15 @@
             $content = "Archivos restaurados.\n\n" . $this->comandos;
             fwrite($log, $content);
             fclose($log);
+            $config = CONFIG;
+            $server = $config['SERVER'];
             $information = ["thisYear"=>date("Y"),
                             "para"=>"TICS",
-                            "server"=>CONFIG['SERVER']
+                            "server"=>$server
                            ];
+            $email = $config['MAIL_TO_NOTIFY'];
             $data = ["tipoMail"=>"ataque",
-                     "email"=>CONFIG['MAIL_TO_NOTIFY'],
+                     "email"=>$email,
                      "subject"=>"Ataque detectado ". date("Y-m-d H:i.s"),
                      "information"=>$information
                     ];             
@@ -216,7 +219,8 @@
         }
     }
     
-    $watchDog = new WatchDog(CONFIG['TARGET_DIR'], CONFIG['SOURCE_DIR']);
+    $setup = CONFIG;
+    $watchDog = new WatchDog($setup['TARGET_DIR'], $setup['SOURCE_DIR']);
     
     while(true) {
         $watchDog->comparar();
