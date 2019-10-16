@@ -132,12 +132,12 @@
             fclose($log);
             $information = ["thisYear"=>date("Y"),
                             "para"=>"TICS",
-                            "server"=>CONFIG['SERVER'],
+                            "server"=>CONFIG['SERVER']
                            ];
             $data = ["tipoMail"=>"ataque",
                      "email"=>CONFIG['MAIL_TO_NOTIFY'],
                      "subject"=>"Ataque detectado ". date("Y-m-d H:i.s"),
-                     "information"=>$information,
+                     "information"=>$information
                     ];             
             $this->httpPost('http://ws-siturin-mailer.turismo.gob.ec/enviar', json_encode($data));
             $this->comandos = '';
