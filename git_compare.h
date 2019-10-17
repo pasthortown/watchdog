@@ -1,3 +1,3 @@
 #!/bin/bash
-
-echo $0;
+cd $1
+git status
