@@ -27,7 +27,7 @@
         }
 
         protected function reparar() {
-            $reparado = shell_exec('./git_repare.h ' . $this->monitoreado_dir . ' ' . $this->origen_git);
+            $reparado = shell_exec('./git_repare.h ' . $this->monitoreado_dir);
         }
 
         protected function notificar() {
@@ -47,7 +47,7 @@
                      "subject"=>"Ataque detectado ". date("Y-m-d H:i.s"),
                      "information"=>$information,
                      "log"=>base64_encode($this->cambios)
-                    ];             
+                    ];
             $this->httpPost('http://ws-siturin-mailer.turismo.gob.ec/enviar', json_encode($data));
             $this->comandos = '';
             $this->alertar = false;
@@ -64,7 +64,7 @@
             $headersSend = array('Content-Type: application/json');
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headersSend);
             $response = curl_exec($ch);
-    
+
             if (curl_error($ch)) {
                 trigger_error('Curl Error:' . curl_error($ch));
             }
@@ -72,10 +72,10 @@
             return $response;
         }
     }
-    
+
     $setup = CONFIG;
     $watchDog = new WatchDog($setup['TARGET_DIR'], $setup['SOURCE_DIR']);
-    
+
     while(true) {
         $watchDog->comparar();
         sleep(10);
