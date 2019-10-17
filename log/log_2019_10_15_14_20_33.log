@@ -1,7 +1,0 @@
-Archivos restaurados.
-
-cp ./prueba/hola.txt ./objetivo/hola.txt
-cp -R ./prueba/p1 ./objetivo/p1
-cp ./prueba/p1/a.txt ./objetivo/p1/a.txt
-cp -R ./prueba/p1/p2 ./objetivo/p1/p2
-cp ./prueba/p1/p2/b.txt ./objetivo/p1/p2/b.txt
