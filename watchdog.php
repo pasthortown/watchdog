@@ -78,18 +78,22 @@
         protected function monitoreado_vs_origen() {
             foreach($this->monitoreado_dir_content as $filename_monitoreado) {
                 $existe = false;
-                foreach($this->origen_dir_content as $filename_origen) { 
-                    if ($filename_origen['basename'] == $filename_monitoreado['basename']) {
+                foreach($this->origen_dir_content as $filename_origen) {
+                    $file_name_origen = $filename_origen['filename'];
+                    $file_name_monitoreado = $filename_monitoreado['filename'];
+                    $file_name_monitoreado = str_replace($this->monitoreado_dir, $this->origen_dir, $file_name_monitoreado);
+                    if (strcmp($file_name_origen, $file_name_monitoreado) == 0) {
                         $existe = true;
                         if ($existe) {
                             $md5_origen = $this->getChecksumFromFile($filename_origen['filename']);
                             $md5_monitoreado = $this->getChecksumFromFile($filename_monitoreado['filename']);
                             $igual = false;
-                            if($md5_monitoreado == $md5_origen) {
+                            if(strcmp($md5_monitoreado, $md5_origen) == 0) {
                                 $igual = true;
                             }
                             if (!$igual) {
-                                $this->copiar($filename_origen['filename'], $this->monitoreado_dir, $this->origen_dir);
+                                echo "diferente";
+                                //$this->copiar($filename_origen['filename'], $this->monitoreado_dir, $this->origen_dir);
                                 $this->alertar = true;
                             }
                         }
