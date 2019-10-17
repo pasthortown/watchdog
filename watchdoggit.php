@@ -4,34 +4,35 @@
 
     class WatchDog {
         public $monitoreado_dir = '';
-        public $origen_dir = '';
-        private $sonIguales = false;
-        public $alertar = false;
-        public $comandos = '';
-        private $monitoreado_dir_content = [];
-        private $origen_dir_content = [];
+        public $origen_git = '';
+        public $cambios = '';
 
-        function __construct($monitoreado_dir, $origen_dir) {
+        function __construct($monitoreado_dir, $origen_git) {
             $this->monitoreado_dir = $monitoreado_dir;
-            $this->origen_dir = $origen_dir;
+            $this->origen_git = $origen_git;
         }
 
         public function comparar() {
-            $sonIguales = $this->son_iguales();
-            if ($this->alertar) {
-                $this->notificar();
+            $resultado = shell_exec('./git_compare.h ' . $this->monitoreado_dir);
+            $found = strpos($resultado, "nothing to commit, working directory clean");
+            if (!$found) {
+               $this->cambios = $resultado;
+               $this->reparar();
+               $this->notificar();
+               return false;
+            } else {
+               $this->cambios = '';
+               return true;
             }
         }
 
-        protected function son_iguales() {
-            $resultado = shell_exec('./git_compare.h ' . $this->monitoreado_dir);
-            
-            return $resultado;
+        protected function reparar() {
+            $reparado = shell_exec('./git_repare.h ' . $this->monitoreado_dir . ' ' . $this->origen_git);
         }
 
         protected function notificar() {
             $log = fopen('./log/log_' . date("Y_m_d_H_i_s") .'.log', "w");
-            $content = "Archivos restaurados.\n\n" . $this->comandos;
+            $content = "CAMBIOS\n\n" . $this->cambios;
             fwrite($log, $content);
             fclose($log);
             $config = CONFIG;
