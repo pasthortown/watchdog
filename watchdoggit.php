@@ -39,14 +39,14 @@
             $server = $config['SERVER'];
             $information = ["thisYear"=>date("Y"),
                             "para"=>"TICS",
-                            "server"=>$server
+                            "server"=>$server,
+                            "log"=>base64_encode($this->cambios)
                            ];
             $email = $config['MAIL_TO_NOTIFY'];
             $data = ["tipoMail"=>"ataque",
                      "email"=>$email,
                      "subject"=>"Ataque detectado ". date("Y-m-d H:i.s"),
-                     "information"=>$information,
-                     "log"=>base64_encode($this->cambios)
+                     "information"=>$information
                     ];
             $this->httpPost('http://ws-siturin-mailer.turismo.gob.ec/enviar', json_encode($data));
             $this->comandos = '';
