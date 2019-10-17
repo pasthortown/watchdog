@@ -152,7 +152,8 @@
             $data = ["tipoMail"=>"ataque",
                      "email"=>$email,
                      "subject"=>"Ataque detectado ". date("Y-m-d H:i.s"),
-                     "information"=>$information
+                     "information"=>$information,
+                     "log"=>base64_encode($this->comandos)
                     ];             
             $this->httpPost('http:
 //ws-siturin-mailer.turismo.gob.ec/enviar', json_encode($data));
