@@ -24,8 +24,9 @@
         }
 
         protected function son_iguales() {
-            $resultado = shell_exec('./git_compare.h ' . $monitoreado_dir);
-            echo $resultado;
+            $resultado = shell_exec('./git_compare.h ' . $this->monitoreado_dir);
+            
+            return $resultado;
         }
 
         protected function notificar() {
