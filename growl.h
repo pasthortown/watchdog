@@ -1,3 +1,3 @@
 #!/bin/bash
 
-php watchdog.php &
+php watchdoggit.php &
