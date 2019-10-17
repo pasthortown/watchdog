@@ -1,5 +1,0 @@
-Archivos restaurados.
-
-cp -R ./prueba/p1 ./objetivo/p1
-cp -R ./prueba/p1/a ./objetivo/p1/a
-cp -R ./prueba/p1/p2 ./objetivo/p1/p2

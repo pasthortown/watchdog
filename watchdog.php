@@ -19,10 +19,14 @@
         public function comparar() {
             $sonIguales = $this->son_iguales();
             $this->monitoreado_vs_origen($this->monitoreado_dir_content, $this->origen_dir_content);
+            if ($this->alertar) {
+                $this->notificar();
+            }
             $this->origen_vs_monitoreado($this->monitoreado_dir_content, $this->origen_dir_content);
             if ($this->alertar) {
                 $this->notificar();
             }
+            sleep(10);
         }
 
         protected function origen_vs_monitoreado() {
@@ -60,7 +64,10 @@
                     $monitoreado_file_filename = str_replace($this->monitoreado_dir, $this->origen_dir, $monitoreado_file_filename);
                     if ($monitoreado_file_filename == $origen_file_filename) {
                         $existe = true;
-                        if ($this->getChecksumFromFile($monitoreado_file['filename']) == $this->getChecksumFromFile($origen_file['filename'])) {
+                        $md5_origen = $this->getChecksumFromFile($monitoreado_file['filename']);
+                        $md5_target = $this->getChecksumFromFile($origen_file['filename']);
+                        $comp_result = strcmp($md5_origen, $md5_target);
+                        if ( $comp_result != 0 ) {
                             $igual = true;
                         }   
                     }
@@ -78,14 +85,17 @@
         protected function monitoreado_vs_origen() {
             foreach($this->monitoreado_dir_content as $filename_monitoreado) {
                 $existe = false;
-                foreach($this->origen_dir_content as $filename_origen) { 
-                    if ($filename_origen['basename'] == $filename_monitoreado['basename']) {
+                foreach($this->origen_dir_content as $filename_origen) {
+                    $file_name_origen = $filename_origen['filename'];
+                    $file_name_monitoreado = $filename_monitoreado['filename'];
+                    $file_name_monitoreado = str_replace($this->monitoreado_dir, $this->origen_dir, $file_name_monitoreado);
+                    if (strcmp($file_name_origen, $file_name_monitoreado) == 0) {
                         $existe = true;
                         if ($existe) {
                             $md5_origen = $this->getChecksumFromFile($filename_origen['filename']);
                             $md5_monitoreado = $this->getChecksumFromFile($filename_monitoreado['filename']);
                             $igual = false;
-                            if($md5_monitoreado == $md5_origen) {
+                            if(strcmp($md5_monitoreado, $md5_origen) == 0) {
                                 $igual = true;
                             }
                             if (!$igual) {
@@ -121,6 +131,7 @@
             } else {
                 $comando = 'cp ' . $filename . ' ' . $destino;
             }
+            $this->alertar = true;
             $this->comandos .= $comando . "\n";
             $resultado = shell_exec($comando);
         }
@@ -142,7 +153,8 @@
                      "subject"=>"Ataque detectado ". date("Y-m-d H:i.s"),
                      "information"=>$information
                     ];             
-            $this->httpPost('http://ws-siturin-mailer.turismo.gob.ec/enviar', json_encode($data));
+            $this->httpPost('http:
+//ws-siturin-mailer.turismo.gob.ec/enviar', json_encode($data));
             $this->comandos = '';
             $this->alertar = false;
         }
@@ -224,5 +236,4 @@
     
     while(true) {
         $watchDog->comparar();
-        sleep(10);
     }
