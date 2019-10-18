@@ -4,12 +4,10 @@
 
     class WatchDog {
         public $monitoreado_dir = '';
-        public $origen_git = '';
         public $cambios = '';
 
-        function __construct($monitoreado_dir, $origen_git) {
+        function __construct($monitoreado_dir) {
             $this->monitoreado_dir = $monitoreado_dir;
-            $this->origen_git = $origen_git;
         }
 
         public function comparar() {
@@ -74,7 +72,7 @@
     }
 
     $setup = CONFIG;
-    $watchDog = new WatchDog($setup['TARGET_DIR'], $setup['SOURCE_DIR']);
+    $watchDog = new WatchDog($setup['TARGET_DIR']);
 
     while(true) {
         $watchDog->comparar();
